@@ -1,0 +1,329 @@
+{
+    "info": {
+        "_postman_id": "a5b3e1f4-1a9c-4b7a-9f5a-8f6e4a8d1b2c",
+        "name": "To-Do List API (Laravel)",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "description": "REST API для управления задачами To-Do List. Валидация: title не содержит HTML, description очищается от тегов, status только 1-5."
+    },
+    "item": [
+        {
+            "name": "GET /api/tasks — Получить все задачи",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/tasks",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tasks"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "POST /api/tasks — Создать задачу (успешно)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"title\": \"Купить молоко\",\n  \"description\": \"Купить 2 литра молока в магазине\",\n  \"status\": 1\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/tasks",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tasks"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "POST /api/tasks — Создать задачу с HTML в title (ожидается 422)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"title\": \"<script>alert('xss')</script>\",\n  \"description\": \"Тестовое описание\",\n  \"status\": 1\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/tasks",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tasks"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "POST /api/tasks — Создать задачу с HTML в description (ожидается 201, теги удаляются)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"title\": \"Проверка очистки\",\n  \"description\": \"<p>Это описание с <b>HTML</b> и <script>alert(1)</script></p>\",\n  \"status\": 2\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/tasks",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tasks"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "POST /api/tasks — Создать задачу с неверным статусом (ожидается 422)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"title\": \"Тест\",\n  \"description\": \"Тест\",\n  \"status\": 999\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/tasks",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tasks"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "POST /api/tasks — Создать задачу с пустым title (ожидается 422)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"title\": \"\",\n  \"description\": \"Тест\",\n  \"status\": 1\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/tasks",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tasks"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "GET /api/tasks/{id} — Получить одну задачу",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/tasks/{{task_id}}",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tasks",
+                        "{{task_id}}"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "GET /api/tasks/{id} — Получить несуществующую задачу (ожидается 404)",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/tasks/999999",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tasks",
+                        "999999"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "PUT /api/tasks/{id} — Обновить задачу",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"title\": \"Обновлённая задача\",\n  \"description\": \"<b>Обновлённое</b> описание с HTML\",\n  \"status\": 3\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/tasks/{{task_id}}",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tasks",
+                        "{{task_id}}"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "PUT /api/tasks/{id} — Обновить с пустым title (ожидается 422)",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"title\": \"\",\n  \"description\": \"Тест\",\n  \"status\": 1\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/tasks/{{task_id}}",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tasks",
+                        "{{task_id}}"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "DELETE /api/tasks/{id} — Удалить задачу",
+            "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/tasks/{{task_id}}",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tasks",
+                        "{{task_id}}"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "DELETE /api/tasks/{id} — Удалить несуществующую задачу (ожидается 404)",
+            "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/tasks/999999",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "tasks",
+                        "999999"
+                    ]
+                }
+            },
+            "response": []
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "id": "7a8b9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d",
+            "key": "base_url",
+            "value": "http://127.0.0.1:8000",
+            "type": "string"
+        },
+        {
+            "id": "f0e1d2c3-b4a5-6789-0123-456789abcdef",
+            "key": "task_id",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}
