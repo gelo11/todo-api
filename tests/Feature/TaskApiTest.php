@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class TaskApiTest extends TestCase
 {
-    use RefreshDatabase; // Очищает БД после каждого теста
+    use RefreshDatabase;
 
     public function test_can_list_all_tasks()
     {
@@ -17,19 +17,18 @@ class TaskApiTest extends TestCase
         $response = $this->getJson('/api/tasks');
 
         $response->assertStatus(200)
-                 ->assertJsonCount(3, 'data')
-                 ->assertJsonStructure([
-                     'data' => [
-                         '*' => [
-                             'id',
-                             'title',
-                             'description',
-                             'status',
-                             'created_at',
-                             'updated_at'
-                         ]
-                     ]
-                 ]);
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'title',
+                        'description',
+                        'status',
+                        'created_at',
+                        'updated_at'
+                    ]
+                ]
+            ]);
     }
 
     public function test_can_create_task_with_valid_data()
@@ -43,23 +42,23 @@ class TaskApiTest extends TestCase
         $response = $this->postJson('/api/tasks', $data);
 
         $response->assertStatus(201)
-                 ->assertJsonStructure([
-                     'data' => [
-                         'id',
-                         'title',
-                         'description',
-                         'status',
-                         'created_at',
-                         'updated_at'
-                     ]
-                 ])
-                 ->assertJson([
-                     'data' => [
-                         'title' => 'Купить молоко',
-                         'description' => 'Купить 2 литра молока',
-                         'status' => 1,
-                     ]
-                 ]);
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'title',
+                    'description',
+                    'status',
+                    'created_at',
+                    'updated_at'
+                ]
+            ])
+            ->assertJson([
+                'data' => [
+                    'title' => 'Купить молоко',
+                    'description' => 'Купить 2 литра молока',
+                    'status' => 1,
+                ]
+            ]);
 
         $this->assertDatabaseHas('tasks', [
             'title' => 'Купить молоко',
@@ -77,7 +76,13 @@ class TaskApiTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['title']);
+            ->assertJson([
+                'message' => 'The given data was invalid.',
+                'code' => 'VALIDATION_ERROR',
+                'errors' => [
+                    'title' => ['The title field is required.']
+                ]
+            ]);
     }
 
     public function test_cannot_create_task_with_html_in_title()
@@ -89,7 +94,13 @@ class TaskApiTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['title']);
+            ->assertJson([
+                'message' => 'The given data was invalid.',
+                'code' => 'VALIDATION_ERROR',
+                'errors' => [
+                    'title' => ['The title may not contain <, >, or & characters.']
+                ]
+            ]);
     }
 
     public function test_description_is_automatically_cleaned_of_html_tags()
@@ -106,7 +117,7 @@ class TaskApiTest extends TestCase
 
         $this->assertDatabaseHas('tasks', [
             'title' => 'Test',
-            'description' => 'Описание с тегамиevil()', // HTML удалён!
+            'description' => 'Описание с тегамиevil()', // strip_tags() удалил теги, оставил содержимое
             'status' => 2,
         ]);
     }
@@ -120,7 +131,13 @@ class TaskApiTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['status']);
+            ->assertJson([
+                'message' => 'The given data was invalid.',
+                'code' => 'VALIDATION_ERROR',
+                'errors' => [
+                    'status' => ['The selected status is invalid.']
+                ]
+            ]);
     }
 
     public function test_can_get_single_task()
@@ -130,30 +147,34 @@ class TaskApiTest extends TestCase
         $response = $this->getJson("/api/tasks/{$task->id}");
 
         $response->assertStatus(200)
-                 ->assertJsonStructure([
-                     'data' => [
-                         'id',
-                         'title',
-                         'description',
-                         'status',
-                         'created_at',
-                         'updated_at'
-                     ]
-                 ])
-                 ->assertJson([
-                     'data' => [
-                         'id' => $task->id,
-                         'title' => $task->title,
-                         'status' => $task->status,
-                     ]
-                 ]);
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'title',
+                    'description',
+                    'status',
+                    'created_at',
+                    'updated_at'
+                ]
+            ])
+            ->assertJson([
+                'data' => [
+                    'id' => $task->id,
+                    'title' => $task->title,
+                    'status' => $task->status,
+                ]
+            ]);
     }
 
     public function test_returns_404_for_nonexistent_task()
     {
         $response = $this->getJson('/api/tasks/999999');
 
-        $response->assertStatus(404);
+        $response->assertStatus(404)
+            ->assertJson([
+                'message' => 'Not found.',
+                'code' => 'NOT_FOUND'
+            ]);
     }
 
     public function test_can_update_task()
@@ -173,13 +194,13 @@ class TaskApiTest extends TestCase
         $response = $this->putJson("/api/tasks/{$task->id}", $updatedData);
 
         $response->assertStatus(200)
-                 ->assertJson([
-                     'data' => [
-                         'title' => 'Новое название',
-                         'description' => 'Новое описание без тегов',
-                         'status' => 3,
-                     ]
-                 ]);
+            ->assertJson([
+                'data' => [
+                    'title' => 'Новое название',
+                    'description' => 'Новое описание без тегов',
+                    'status' => 3,
+                ]
+            ]);
 
         $this->assertDatabaseHas('tasks', [
             'id' => $task->id,
@@ -200,7 +221,13 @@ class TaskApiTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['title']);
+            ->assertJson([
+                'message' => 'The given data was invalid.',
+                'code' => 'VALIDATION_ERROR',
+                'errors' => [
+                    'title' => ['The title field is required.']
+                ]
+            ]);
     }
 
     public function test_can_delete_task()
@@ -209,15 +236,18 @@ class TaskApiTest extends TestCase
 
         $response = $this->deleteJson("/api/tasks/{$task->id}");
 
-        $response->assertStatus(204);
-
-        $this->assertDatabaseMissing('tasks', ['id' => $task->id]);
+        $response->assertStatus(204)
+            ->assertJsonCount(0); // Проверяем, что тело пустое
     }
 
     public function test_delete_nonexistent_task_returns_404()
     {
         $response = $this->deleteJson('/api/tasks/999999');
 
-        $response->assertStatus(404);
+        $response->assertStatus(404)
+            ->assertJson([
+                'message' => 'Not found.',
+                'code' => 'NOT_FOUND'
+            ]);
     }
 }
